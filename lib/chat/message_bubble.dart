@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class MessageBubble extends StatelessWidget {
+class MessageBubble extends StatefulWidget {
   final String message;
   final bool isMe;
+  // final String userId;
   final String userName;
   final String userImage;
   const MessageBubble({
@@ -12,8 +13,14 @@ class MessageBubble extends StatelessWidget {
     this.isMe = false,
     required this.userName,
     required this.userImage,
+    // required this.userId,
   }) : super(key: key);
 
+  @override
+  State<MessageBubble> createState() => _MessageBubbleState();
+}
+
+class _MessageBubbleState extends State<MessageBubble> {
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -21,19 +28,32 @@ class MessageBubble extends StatelessWidget {
       children: [
         Row(
           mainAxisAlignment:
-              isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+              widget.isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
           children: [
             Container(
               width: 150,
               decoration: BoxDecoration(
-                color: isMe ? Colors.grey[300] : Theme.of(context).accentColor,
+                gradient: widget.isMe
+                    ? const LinearGradient(
+                        colors: [
+                          Color(0xff009688),
+                          Color(0xff006259),
+                        ],
+                      )
+                    : LinearGradient(
+                        colors: [
+                          Colors.grey.shade300,
+                          Colors.grey.shade300,
+                        ],
+                      ),
+                // color: isMe ? Colors.grey[300] : Theme.of(context).accentColor,
                 borderRadius: BorderRadius.only(
                   topLeft: const Radius.circular(12),
                   topRight: const Radius.circular(12),
-                  bottomLeft: !isMe
+                  bottomLeft: !widget.isMe
                       ? const Radius.circular(0)
                       : const Radius.circular(12),
-                  bottomRight: isMe
+                  bottomRight: widget.isMe
                       ? const Radius.circular(0)
                       : const Radius.circular(12),
                 ),
@@ -47,31 +67,32 @@ class MessageBubble extends StatelessWidget {
                 vertical: 16,
               ),
               child: Column(
-                crossAxisAlignment:
-                    isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                crossAxisAlignment: widget.isMe
+                    ? CrossAxisAlignment.end
+                    : CrossAxisAlignment.start,
                 children: [
                   Text(
-                    userName,
+                    widget.userName,
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: isMe
-                            ? Colors.black
+                        color: widget.isMe
+                            ? Colors.white
                             : Theme.of(context)
                                 .accentTextTheme
                                 .titleMedium
                                 ?.color),
                   ),
                   Text(
-                    message,
+                    widget.message,
                     style: TextStyle(
-                      color: isMe
-                          ? Colors.black
+                      color: widget.isMe
+                          ? Colors.white
                           : Theme.of(context)
                               .accentTextTheme
                               .titleMedium
                               ?.color,
                     ),
-                    textAlign: isMe ? TextAlign.end : TextAlign.start,
+                    textAlign: widget.isMe ? TextAlign.end : TextAlign.start,
                   ),
                 ],
               ),
@@ -80,10 +101,10 @@ class MessageBubble extends StatelessWidget {
         ),
         Positioned(
           top: 0,
-          left: isMe ? null : 130,
-          right: isMe ? 130 : null,
+          left: widget.isMe ? null : 130,
+          right: widget.isMe ? 130 : null,
           child: CircleAvatar(
-            backgroundImage: NetworkImage(userImage),
+            backgroundImage: NetworkImage(widget.userImage),
           ),
         ),
       ],

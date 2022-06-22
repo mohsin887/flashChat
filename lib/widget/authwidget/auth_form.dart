@@ -11,7 +11,7 @@ class AuthForm extends StatefulWidget {
     String email,
     String password,
     String username,
-    XFile image,
+    XFile? image,
     bool isLogin,
     BuildContext cntx,
   ) submitFn;
@@ -31,9 +31,9 @@ class _AuthFormState extends State<AuthForm> {
 
   XFile? _userImageFile;
 
-  void _pickedImage(XFile image) {
-    _userImageFile = image;
-  }
+  // void _pickedImage(XFile? image) {
+  //   _userImageFile = (image == null ? null : <XFile>[image]) as XFile?;
+  // }
 
   void _trySubmit() {
     final isValid = _formKey.currentState!.validate();
@@ -48,17 +48,17 @@ class _AuthFormState extends State<AuthForm> {
       );
       return;
     }
-
     if (isValid) {
       _formKey.currentState!.save();
       widget.submitFn(
         _userEmail.trim(),
         _userPassword.trim(),
         _userName.trim(),
-        _userImageFile!,
+        _userImageFile,
         _isLogin,
         context,
       );
+      return;
     }
   }
 
@@ -76,9 +76,9 @@ class _AuthFormState extends State<AuthForm> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (!_isLogin)
-                    UserImagePicker(
-                      imagePickFn: _pickedImage,
-                    ),
+                    UserImagePicker(imagePickFn: (XFile image) {
+                      _userImageFile = image;
+                    }),
                   TextFormField(
                     key: const ValueKey('email'),
                     validator: (value) {
@@ -114,7 +114,7 @@ class _AuthFormState extends State<AuthForm> {
                   TextFormField(
                     key: const ValueKey('password'),
                     validator: (value) {
-                      if (value!.isEmpty || value.length < 8) {
+                      if (value!.isEmpty || value.length < 2) {
                         return 'Password must be at least 8 Character long';
                       } else {
                         return null;

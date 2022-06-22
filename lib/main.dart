@@ -1,5 +1,7 @@
 import 'package:chat_app/screen/auth_screen.dart';
 import 'package:chat_app/screen/chat_screen.dart';
+import 'package:chat_app/screen/splash_screen.dart';
+import 'package:chat_app/screen/user_list_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -31,15 +33,18 @@ class MyApp extends StatelessWidget {
         ),
         appBarTheme: const AppBarTheme(
           elevation: 0,
-          color: Colors.teal,
+          color: Colors.white,
           centerTitle: true,
         ),
       ),
       home: StreamBuilder(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (ctx, userSnapshot) {
+          if (userSnapshot.connectionState == ConnectionState.waiting) {
+            return const SplashScreen();
+          }
           if (userSnapshot.hasData) {
-            return const ChatScreen();
+            return const UserListScreen();
           } else {
             return const AuthScreen();
           }

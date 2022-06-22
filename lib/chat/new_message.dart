@@ -10,24 +10,27 @@ class NewMessages extends StatefulWidget {
 }
 
 class _NewMessagesState extends State<NewMessages> {
-  var _enterMessage = '';
-
   final _controller = TextEditingController();
   void _sendMessage() async {
-    FocusScope.of(context).unfocus();
-    final user = FirebaseAuth.instance.currentUser;
-    final userData = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user?.uid)
-        .get();
-    FirebaseFirestore.instance.collection('chat').add({
-      'text': _enterMessage,
-      'createdAt': Timestamp.now(),
-      'userId': user?.uid,
-      'username': userData['username'],
-      'userImage': userData['image_url'],
-    });
-    _controller.clear();
+    if (_controller.text.isNotEmpty) {
+      FocusScope.of(context).unfocus();
+      final user = FirebaseAuth.instance.currentUser;
+      final userData = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user?.uid)
+          .get();
+      FirebaseFirestore.instance.collection('chat').add({
+        'text': _controller.text,
+        'createdAt': FieldValue.serverTimestamp(),
+        'userId': user?.uid,
+        'username': userData['username'],
+        'userImage': userData['image_url'],
+      }).then((value) => _controller.text = '');
+      _controller.clear();
+    }
+    // setState(() {
+    //   _controller.text = '';
+    // });
   }
 
   @override
@@ -40,17 +43,16 @@ class _NewMessagesState extends State<NewMessages> {
         children: [
           Expanded(
             child: TextField(
+              textCapitalization: TextCapitalization.sentences,
               controller: _controller,
-              decoration: const InputDecoration(labelText: 'Send a message...'),
-              onChanged: (value) {
-                setState(() {
-                  _enterMessage = value;
-                });
-              },
+              keyboardType: TextInputType.text,
+              textInputAction: TextInputAction.send,
+              decoration:
+                  const InputDecoration(labelText: 'Write your message'),
             ),
           ),
           IconButton(
-            onPressed: _enterMessage.trim().isEmpty ? null : _sendMessage,
+            onPressed: _sendMessage,
             icon: const Icon(Icons.send),
             color: Theme.of(context).primaryColor,
           )

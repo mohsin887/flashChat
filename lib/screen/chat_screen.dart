@@ -1,13 +1,18 @@
 import 'package:chat_app/chat/messages.dart';
 import 'package:chat_app/chat/new_message.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({Key? key}) : super(key: key);
+  final String username;
+  final String imageUrl;
+  final String senderId;
+  const ChatScreen({
+    Key? key,
+    required this.username,
+    required this.imageUrl,
+    required this.senderId,
+  }) : super(key: key);
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -15,77 +20,28 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   @override
-  void initState() {
-    final fbm = FirebaseMessaging.instance;
-    fbm.requestPermission(
-      alert: true, // Required to display a heads up notification
-      badge: true,
-      sound: true,
-    );
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('Got a message, app is in the foreground!');
-      print('Message data: ${message.data}');
-
-      if (message.notification != null) {
-        print('Message also contained a notification: ${message.notification}');
-      }
-    });
-    FirebaseMessaging.onMessageOpenedApp.listen((message) {
-      print('A new onMessageOpenedApp event was published!');
-      print('Message Data $message');
-    });
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'ChatApp',
-          style: TextStyle(
-            color: Colors.white,
-          ),
-        ),
-        actions: [
-          DropdownButton(
-            items: [
-              DropdownMenuItem(
-                value: 'Logout',
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    Icon(
-                      Icons.exit_to_app,
-                      color: Colors.red,
-                    ),
-                    SizedBox(
-                      width: 8,
-                    ),
-                    Text('Logout'),
-                  ],
-                ),
-              ),
-            ],
-            onChanged: (itemsIdentifier) {
-              if (itemsIdentifier == 'Logout') {
-                FirebaseAuth.instance.signOut();
-              }
-            },
-            icon: Icon(
-              Icons.more_vert,
-              color: Theme.of(context).primaryIconTheme.color,
-            ),
-          )
-        ],
-      ),
+      // appBar: AppBar(
+      //   title: Text(
+      //     widget.username,
+      //     style: const TextStyle(
+      //       color: Colors.white,
+      //     ),
+      //   ),
+      // ),
       body: SizedBox(
         child: Column(
-          children: const [
+          children: [
             Expanded(
-              child: Messages(),
+              child: Messages(
+                senderId: widget.senderId, senderName: widget.username,
+                senderImage: widget.imageUrl,
+                // receiverId: widget.receiverId,
+                // userMap: {},
+              ),
             ),
-            NewMessages(),
+            // const NewMessages(),
           ],
         ),
       ),
