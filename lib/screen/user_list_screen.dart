@@ -75,9 +75,9 @@ class _UserListScreenState extends State<UserListScreen>
                 FirebaseAuth.instance.signOut();
               }
             },
-            icon: Icon(
+            icon: const Icon(
               Icons.more_vert,
-              color: Theme.of(context).primaryIconTheme.color,
+              color: Colors.black,
             ),
           )
         ],

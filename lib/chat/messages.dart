@@ -121,7 +121,6 @@ class _MessagesState extends State<Messages> {
             );
           }
           if (chatSnapshot.hasData) {
-            var data;
             final chatDocuments = chatSnapshot.data!.docs;
 
             return Scaffold(
@@ -146,8 +145,9 @@ class _MessagesState extends State<Messages> {
                           title: Text(
                             toBeginningOfSentenceCase(senderName)!,
                             style: const TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold),
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           leading: CircleAvatar(
                             backgroundImage: NetworkImage(widget.senderImage),

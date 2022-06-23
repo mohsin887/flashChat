@@ -88,7 +88,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 'username': username,
                 'email': email,
                 'image_url': url,
-                'status': 'Available',
+                'status': 'Offline',
                 'userid': userCredential.user?.uid,
               },
               SetOptions(merge: true),
