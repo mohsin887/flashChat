@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class MessageBubble extends StatefulWidget {
@@ -74,23 +73,18 @@ class _MessageBubbleState extends State<MessageBubble> {
                   Text(
                     widget.userName,
                     style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: widget.isMe
-                            ? Colors.white
-                            : Theme.of(context)
-                                .accentTextTheme
-                                .titleMedium
-                                ?.color),
+                      fontWeight: FontWeight.bold,
+                      color: widget.isMe
+                          ? Colors.white
+                          : Theme.of(context).colorScheme.secondary,
+                    ),
                   ),
                   Text(
                     widget.message,
                     style: TextStyle(
                       color: widget.isMe
                           ? Colors.white
-                          : Theme.of(context)
-                              .accentTextTheme
-                              .titleMedium
-                              ?.color,
+                          : Theme.of(context).colorScheme.secondary,
                     ),
                     textAlign: widget.isMe ? TextAlign.end : TextAlign.start,
                   ),

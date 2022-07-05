@@ -1,10 +1,11 @@
+import 'package:chat_app/helper/user_model.dart';
+import 'package:chat_app/provider/auth.dart';
+import 'package:chat_app/provider/user_provider.dart';
 import 'package:intl/intl.dart' show DateFormat, toBeginningOfSentenceCase;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_bubble/bubble_type.dart';
-import 'package:flutter_chat_bubble/chat_bubble.dart';
-import 'package:flutter_chat_bubble/clippers/chat_bubble_clipper_6.dart';
+import 'package:provider/provider.dart';
+
 
 class Messages extends StatefulWidget {
   final String senderId;
@@ -22,40 +23,52 @@ class Messages extends StatefulWidget {
 }
 
 class _MessagesState extends State<Messages> {
-  CollectionReference chats = FirebaseFirestore.instance.collection('chat');
+  late CollectionReference chats;
   String senderId;
   String senderName;
   final _controller = TextEditingController();
 
   _MessagesState(this.senderId, this.senderName);
 
-  final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+  // final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+  // final currentUserId = const AuthForm(isLoading: false).hashCode.toString();
   var chatDocId;
 
   @override
   void initState() {
     super.initState();
+    chats = FirebaseFirestore.instance.collection('users');
+    print('CHAT COLLECTION');
+    print(chats.id);
     checkUser();
   }
 
   void checkUser() async {
+    final currentUserId = Provider.of<Auth>(context, listen: false).userId;
+    Provider.of<UserProvider>(context, listen: false).userID;
+
     await chats
-        .where('users', isEqualTo: {senderId: null, currentUserId: null})
-        .limit(1)
-        .get()
+        .where('userid', isEqualTo: {'1656656912267'})
+        .snapshots()
+        .single
         .then(
           (QuerySnapshot querySnapshot) async {
             if (querySnapshot.docs.isNotEmpty) {
-              setState(() {
+              /*setState(() {
+                print("SnAPSHOT DOC ID ${querySnapshot.docs.single.id}");
                 chatDocId = querySnapshot.docs.single.id;
-              });
+              })*/
 
               print(chatDocId);
+
+              print(UserModel().username);
             } else {
+              print("ELSE USER");
               await chats.add({
                 'users': {currentUserId: null, senderId: null},
                 'username': {
-                  currentUserId: FirebaseAuth.instance.currentUser?.displayName,
+                  // currentUserId: FirebaseAuth.instance.currentUser?.displayName,
+                  currentUserId: currentUserId,
                   senderId: senderName
                 }
               }).then((value) => {chatDocId = value});
@@ -68,16 +81,18 @@ class _MessagesState extends State<Messages> {
   }
 
   Future<void> sendMessage(String message) async {
-    final user = FirebaseAuth.instance.currentUser;
+    // final user = FirebaseAuth.instance.currentUser;
+    // final String userId = 'userId';
+    // List<UserModel>? list = await Preference().getUserList();
+    // var userId = list.any((user) => user.userId == UserModel().userId);
+    final userId = Provider.of<Auth>(context, listen: false).userId;
 
-    final userData = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user?.uid)
-        .get();
+    final userData =
+        await FirebaseFirestore.instance.collection('users').doc(userId).get();
     if (message == '') return;
     chats.doc(chatDocId).collection('messages').add({
       'createdAt': FieldValue.serverTimestamp(),
-      'userId': user?.uid,
+      'userId': userId,
       'username': userData['username'],
       'senderName': senderName,
       'message': message,
@@ -87,21 +102,18 @@ class _MessagesState extends State<Messages> {
     });
   }
 
-  bool isOnline = true;
+  bool isOnline = false;
 
   bool isSender(String sender) {
-    return sender == currentUserId;
-  }
+    final currentUserId = Provider.of<Auth>(context).userId;
+    print('USER ID    $currentUserId');
 
-  Alignment getAlignment(sender) {
-    if (sender == currentUserId) {
-      return Alignment.topRight;
-    }
-    return Alignment.topLeft;
+    return sender == currentUserId;
   }
 
   @override
   Widget build(BuildContext context) {
+    print('CHAT DOC ID $chatDocId');
     return StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('chat')
@@ -149,9 +161,9 @@ class _MessagesState extends State<Messages> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          leading: CircleAvatar(
-                            backgroundImage: NetworkImage(widget.senderImage),
-                          ),
+                          // leading: CircleAvatar(
+                          //   backgroundImage: NetworkImage(widget.senderImage),
+                          // ),
                           subtitle: Text(
                             snapshot.data!['status'],
                             style: TextStyle(
@@ -237,14 +249,14 @@ class _MessagesState extends State<Messages> {
                                                   data['username']
                                                       .toString())!),
                                               style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  color: isSender(data['userId']
-                                                          .toString())
-                                                      ? Colors.white
-                                                      : Theme.of(context)
-                                                          .accentTextTheme
-                                                          .titleMedium
-                                                          ?.color),
+                                                fontWeight: FontWeight.bold,
+                                                color: isSender(data['userId']
+                                                        .toString())
+                                                    ? Colors.white
+                                                    : Theme.of(context)
+                                                        .colorScheme
+                                                        .secondary,
+                                              ),
                                             ),
                                             Text(
                                               (data['message'].toString()),
@@ -253,9 +265,8 @@ class _MessagesState extends State<Messages> {
                                                         .toString())
                                                     ? Colors.white
                                                     : Theme.of(context)
-                                                        .accentTextTheme
-                                                        .titleMedium
-                                                        ?.color,
+                                                        .colorScheme
+                                                        .secondary,
                                               ),
                                               textAlign: isSender(
                                                       data['userId'].toString())
