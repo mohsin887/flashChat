@@ -5,12 +5,12 @@ import 'package:flutter/material.dart';
 
 class ChatScreen extends StatefulWidget {
   final String username;
-  final String imageUrl;
+  // final String imageUrl;
   final String senderId;
   const ChatScreen({
     Key? key,
     required this.username,
-    required this.imageUrl,
+    // required this.imageUrl,
     required this.senderId,
   }) : super(key: key);
 
@@ -36,7 +36,7 @@ class _ChatScreenState extends State<ChatScreen> {
             Expanded(
               child: Messages(
                 senderId: widget.senderId, senderName: widget.username,
-                senderImage: widget.imageUrl,
+                // senderImage: widget.imageUrl,
                 // receiverId: widget.receiverId,
                 // userMap: {},
               ),

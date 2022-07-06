@@ -1,3 +1,4 @@
+import 'package:chat_app/provider/user_provider.dart';
 import 'package:intl/intl.dart' show DateFormat, toBeginningOfSentenceCase;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -5,16 +6,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_bubble/bubble_type.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart';
 import 'package:flutter_chat_bubble/clippers/chat_bubble_clipper_6.dart';
+import 'package:provider/provider.dart';
 
 class Messages extends StatefulWidget {
   final String senderId;
   final String senderName;
-  final String senderImage;
+  // final String senderImage;
   const Messages({
     Key? key,
     required this.senderId,
     required this.senderName,
-    required this.senderImage,
+    // required this.senderImage,
   }) : super(key: key);
 
   @override
@@ -29,7 +31,7 @@ class _MessagesState extends State<Messages> {
 
   _MessagesState(this.senderId, this.senderName);
 
-  final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+  // final currentUserId = FirebaseAuth.instance.currentUser?.uid;
   var chatDocId;
 
   @override
@@ -39,6 +41,9 @@ class _MessagesState extends State<Messages> {
   }
 
   void checkUser() async {
+    final currentUserId =
+        Provider.of<UserProvider>(context, listen: false).user?.userId;
+
     await chats
         .where('users', isEqualTo: {senderId: null, currentUserId: null})
         .limit(1)
@@ -48,6 +53,7 @@ class _MessagesState extends State<Messages> {
             if (querySnapshot.docs.isNotEmpty) {
               setState(() {
                 chatDocId = querySnapshot.docs.single.id;
+                print('QUERY SNAPSHOTS IS: $chatDocId');
               });
 
               print(chatDocId);
@@ -55,10 +61,15 @@ class _MessagesState extends State<Messages> {
               await chats.add({
                 'users': {currentUserId: null, senderId: null},
                 'username': {
-                  currentUserId: FirebaseAuth.instance.currentUser?.displayName,
+                  currentUserId:
+                      Provider.of<UserProvider>(context, listen: false)
+                          .user
+                          ?.username,
                   senderId: senderName
                 }
-              }).then((value) => {chatDocId = value});
+              }).then((value) => {
+                    chatDocId = value,
+                  });
             }
           },
         )
@@ -68,20 +79,20 @@ class _MessagesState extends State<Messages> {
   }
 
   Future<void> sendMessage(String message) async {
-    final user = FirebaseAuth.instance.currentUser;
+    // final user = FirebaseAuth.instance.currentUser;
+    final user = Provider.of<UserProvider>(context, listen: false).user?.userId;
+    print('SEND MESSAGE USER ID: $user');
 
-    final userData = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user?.uid)
-        .get();
+    final userData =
+        await FirebaseFirestore.instance.collection('users').doc(user).get();
     if (message == '') return;
     chats.doc(chatDocId).collection('messages').add({
       'createdAt': FieldValue.serverTimestamp(),
-      'userId': user?.uid,
+      'userId': user,
       'username': userData['username'],
       'senderName': senderName,
       'message': message,
-      'imageUrl': userData['image_url']
+      // 'imageUrl': userData['image_url']
     }).then((value) {
       _controller.text = '';
     });
@@ -90,15 +101,18 @@ class _MessagesState extends State<Messages> {
   bool isOnline = true;
 
   bool isSender(String sender) {
+    final currentUserId =
+        Provider.of<UserProvider>(context, listen: false).user?.userId;
+
     return sender == currentUserId;
   }
 
-  Alignment getAlignment(sender) {
-    if (sender == currentUserId) {
-      return Alignment.topRight;
-    }
-    return Alignment.topLeft;
-  }
+  // Alignment getAlignment(sender) {
+  //   if (sender == currentUserId) {
+  //     return Alignment.topRight;
+  //   }
+  //   return Alignment.topLeft;
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -150,8 +164,8 @@ class _MessagesState extends State<Messages> {
                                 fontWeight: FontWeight.bold),
                           ),
                           leading: CircleAvatar(
-                            backgroundImage: NetworkImage(widget.senderImage),
-                          ),
+                              // backgroundImage: NetworkImage(widget.senderImage),
+                              ),
                           subtitle: Text(
                             snapshot.data!['status'],
                             style: TextStyle(
@@ -295,10 +309,10 @@ class _MessagesState extends State<Messages> {
                                       ? 180
                                       : null,
                                   child: CircleAvatar(
-                                    backgroundImage: NetworkImage(
-                                      (data['imageUrl'].toString()),
-                                    ),
-                                  ),
+                                      // backgroundImage: NetworkImage(
+                                      //   (data['imageUrl'].toString()),
+                                      // ),
+                                      ),
                                 ),
                               ],
                             );
