@@ -135,7 +135,6 @@ class _MessagesState extends State<Messages> {
             );
           }
           if (chatSnapshot.hasData) {
-            var data;
             final chatDocuments = chatSnapshot.data!.docs;
 
             return Scaffold(
