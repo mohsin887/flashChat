@@ -1,4 +1,3 @@
-
 import 'package:chat_app/provider/user_provider.dart';
 import 'package:chat_app/screen/auth/log_in_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -38,10 +37,63 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Future<void> submit() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
+    if (_formKey.currentState!.validate()) {
+      UserModel? userModel = await Preference()
+          .getUser(_userEmail.text.trim(), _userPassword.text);
+
+      if (userModel == null) {
+        UserModel user = UserModel(
+          username: _userName.text,
+          password: _userPassword.text,
+          email: _userEmail.text,
+          userId: DateTime.now().millisecond.toString(),
+        );
+
+        Provider.of<UserProvider>(context, listen: false).saveUser(user);
+        Preference().saveUser(user);
+        final userId =
+            Provider.of<UserProvider>(context, listen: false).user?.userId;
+        print('USER ID: $userId');
+        final userName =
+            Provider.of<UserProvider>(context, listen: false).user?.username;
+        print('USER NAME: $userName');
+
+        final userEmail =
+            Provider.of<UserProvider>(context, listen: false).user?.email;
+        print('USER EMAILS IS: $userEmail');
+
+        await FirebaseFirestore.instance
+            .collection('users')
+            .where('userId', isEqualTo: userId)
+            .limit(1)
+            .get()
+            .then((QuerySnapshot querySnapshot) {
+          if (querySnapshot.docs.isEmpty) {
+            FirebaseFirestore.instance.collection('users').doc(userId).set(
+              {
+                'username': userName,
+                'email': userEmail,
+                // 'image_url': '_userImageFile',
+                'status': 'Offline',
+                'userId': userId,
+              },
+              SetOptions(merge: true),
+            );
+          }
+        });
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (ctx) => const LogInScreen()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Email is already Exits'),
+            backgroundColor: Theme.of(context).colorScheme.secondary,
+          ),
+        );
+      }
     }
-    List<UserModel>? list = await Preference().getUserList();
+    /*List<UserModel>? list = await Preference().getUserList();
     // final list = Provider.of<UserProvider>(context, listen: false).getUser();
 
     bool isUserAlreadyExist =
@@ -106,7 +158,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       //     _userEmail.text, _userName.text, _userPassword.text, context));
       Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const LogInScreen()));
-    }
+    }*/
   }
 
   @override

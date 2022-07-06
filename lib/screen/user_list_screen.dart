@@ -1,9 +1,14 @@
 import 'dart:async';
 
 import 'package:chat_app/chat/user_bubble.dart';
+import 'package:chat_app/provider/user_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../helper/share_prefs.dart';
+import 'auth/log_in_screen.dart';
 
 class UserListScreen extends StatefulWidget {
   const UserListScreen({Key? key}) : super(key: key);
@@ -22,12 +27,16 @@ class _UserListScreenState extends State<UserListScreen>
   }
 
   Future<void> setStatus(String status) async {
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(FirebaseAuth.instance.currentUser?.uid)
-        .update({
-      'status': status,
-    });
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser?.uid)
+          .update({
+        'status': status,
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override
@@ -40,9 +49,12 @@ class _UserListScreenState extends State<UserListScreen>
     super.didChangeAppLifecycleState(state);
   }
 
-  var currentUser = FirebaseAuth.instance.currentUser?.uid;
+  // var currentUser = FirebaseAuth.instance.currentUser?.uid;
   @override
   Widget build(BuildContext context) {
+    final currentUser =
+        Provider.of<UserProvider>(context, listen: false).getUserId();
+    print('USER ID IS $currentUser');
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -70,55 +82,60 @@ class _UserListScreenState extends State<UserListScreen>
                 ),
               ),
             ],
-            onChanged: (itemsIdentifier) {
+            onChanged: (itemsIdentifier) async {
               if (itemsIdentifier == 'Logout') {
-                FirebaseAuth.instance.signOut();
+                // FirebaseAuth.instance.signOut();
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (ctx) => const LogInScreen(),
+                  ),
+                );
+                await Preference().removeAllData();
               }
             },
             icon: Icon(
               Icons.more_vert,
-              color: Theme.of(context).primaryIconTheme.color,
+              color: Theme.of(context).accentColor,
             ),
           )
         ],
       ),
-      body: FutureBuilder(
-        future: FirebaseAuth.instance.currentUser?.reload(),
-        builder: (ctx, futureSnapshot) {
-          if (futureSnapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-          return StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection(
-                    'users',
-                  )
-                  .where('userid', isNotEqualTo: currentUser)
-                  .snapshots(),
-              builder: (ctx, chatSnapshot) {
-                if (chatSnapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-                final chatDocuments = chatSnapshot.data?.docs;
-                return ListView.builder(
-                  itemBuilder: (ctx, index) {
-                    return UserBubble(
-                      senderId: chatDocuments![index]['userid'],
-                      status: chatDocuments[index]['status'],
-                      username: chatDocuments[index]['username'],
-                      imageUrl: chatDocuments[index]['image_url'],
-                      key: ValueKey(chatDocuments[index].id),
-                    );
-                  },
-                  itemCount: chatDocuments!.length,
+      // body: FutureBuilder(
+      //   future: FirebaseAuth.instance.currentUser?.reload(),
+      //   builder: (ctx, futureSnapshot) {
+      //     if (futureSnapshot.connectionState == ConnectionState.waiting) {
+      //       return const Center(
+      //         child: CircularProgressIndicator(),
+      //       );
+      //     }
+      body: StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection(
+                'users',
+              )
+              .where('userId', isNotEqualTo: currentUser)
+              .snapshots(),
+          builder: (ctx, chatSnapshot) {
+            if (chatSnapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            final chatDocuments = chatSnapshot.data?.docs;
+            print(chatDocuments?.length);
+            return ListView.builder(
+              itemBuilder: (ctx, index) {
+                return UserBubble(
+                  senderId: chatDocuments![index]['userId'],
+                  status: chatDocuments[index]['status'],
+                  username: chatDocuments[index]['username'],
+                  // imageUrl: chatDocuments[index]['image_url'],
+                  key: ValueKey(chatDocuments[index].id),
                 );
-              });
-        },
-      ),
+              },
+              itemCount: chatDocuments!.length,
+            );
+          }),
     );
   }
 }

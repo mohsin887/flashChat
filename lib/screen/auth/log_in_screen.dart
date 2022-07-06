@@ -35,17 +35,27 @@ class _LogInScreenState extends State<LogInScreen> {
   }
 
   Future<void> login() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
+    if (_formKey.currentState!.validate()) {
+      UserModel? userModel = await Preference()
+          .getUser(_userEmail.text.trim(), _userPassword.text);
+
+      if (userModel != null) {
+        Provider.of<UserProvider>(context, listen: false).saveUser(userModel);
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (ctx) => const UserListScreen()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Email is not Exit'),
+            backgroundColor: Theme.of(context).primaryColor,
+          ),
+        );
+      }
     }
     try {
-      Provider.of<UserProvider>(context, listen: false).getUser();
-      await Preference().getUser(_userEmail.text, _userPassword.text);
-      print(
-          'USER LOGIN WITH PROVIDER: ${Provider.of<UserProvider>(context, listen: false).getUser()}');
-      List<UserModel>? list = await Preference().getUserList();
       // final list = Provider.of<UserProvider>(context, listen: false).getUser();
-
+/*
       bool isUserNotExist = list.any((element) =>
           element.email != _userEmail.text &&
           element.password != _userPassword.text);
@@ -65,7 +75,7 @@ class _LogInScreenState extends State<LogInScreen> {
         );
         _userEmail.text = '';
         _userPassword.text = '';
-      }
+      }*/
       // print("user: ${jsonEncode(loggedIn)}");
       // if (loggedIn != null &&
       //     loggedIn.password!.isNotEmpty &&

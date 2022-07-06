@@ -5,7 +5,7 @@ class UserProvider extends ChangeNotifier {
   UserModel? user;
   String? userID;
 
-  void saveUser(UserModel user) async {
+  saveUser(UserModel user) async {
     this.user = user;
     userID = user.userId;
 
@@ -22,7 +22,7 @@ class UserProvider extends ChangeNotifier {
   }
 
   getUserId() {
-    print('=======USER MODEL USER ID==========USERID==========$userID');
+    print('=======USER MODEL USER ID==========USERID==========$user');
     return userID;
   }
 }

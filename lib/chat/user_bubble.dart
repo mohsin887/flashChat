@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 class UserBubble extends StatefulWidget {
   final String username;
   final String status;
-  final String imageUrl;
+  // final String imageUrl;
   final String senderId;
   const UserBubble({
     Key? key,
     required this.username,
-    required this.imageUrl,
+    // required this.imageUrl,
     required this.status,
     required this.senderId,
   }) : super(key: key);
@@ -22,19 +22,19 @@ class _UserBubbleState extends State<UserBubble> {
   void callChatScreen(
     String username,
     String userId,
-    String imageUrl,
+    // String imageUrl,
   ) {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (ctx) {
-        print(username);
-        print(userId);
-        // print(imageUrl);
+        print('USER NAME IS : $username');
+        print('SENDER ID IS: $userId');
+        // print('IMAGE URL IS : $imageUrl');
         print('_UserBubbleState.callChatScreen');
 
         return ChatScreen(
           senderId: userId,
           username: username,
-          imageUrl: imageUrl,
+          // imageUrl: imageUrl,
         );
       }),
     );
@@ -54,18 +54,17 @@ class _UserBubbleState extends State<UserBubble> {
           callChatScreen(
             widget.username,
             widget.senderId,
-            widget.imageUrl,
+            // widget.imageUrl,
           );
-          print('_UserBubbleState.build');
-          print(widget.username);
-          print(widget.senderId);
+          print('USER NAME IS: ${widget.username}');
+          print('USER ID IS: ${widget.senderId}');
           // print(widget.imageUrl);
         },
         title: Text(widget.username),
         subtitle: Text(widget.status),
         leading: CircleAvatar(
-          backgroundImage: NetworkImage(widget.imageUrl),
-        ),
+            // backgroundImage: NetworkImage(widget.imageUrl),
+            ),
       ),
     );
   }
