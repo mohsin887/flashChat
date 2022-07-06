@@ -1,6 +1,6 @@
 import 'package:intl/intl.dart' show DateFormat, toBeginningOfSentenceCase;
 
-import 'package:chat_app/chat/user_card_screen.dart';
+import 'package:chat_app/screen/user_card_screen.dart';
 import 'package:chat_app/provider/user_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
