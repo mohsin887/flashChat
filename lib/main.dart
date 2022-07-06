@@ -1,18 +1,10 @@
-import 'package:chat_app/provider/auth.dart';
 import 'package:chat_app/provider/user_provider.dart';
-import 'package:chat_app/provider/users.dart';
 import 'package:chat_app/screen/auth/log_in_screen.dart';
-import 'package:chat_app/screen/auth_screen.dart';
-import 'package:chat_app/screen/chat_screen.dart';
-import 'package:chat_app/screen/splash_screen.dart';
-import 'package:chat_app/screen/user_list_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'helper/share_prefs.dart';
-import 'helper/user_model.dart';
+import 'helper/share_preference_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,16 +19,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(
-          value: Users(),
-        ),
-        ChangeNotifierProvider.value(
-          value: UserModel(),
-        ),
-        ChangeNotifierProvider.value(
-          value: Auth(),
-        ),
-        ChangeNotifierProvider.value(
-          value: Preference(),
+          value: SharedPreferenceScreen(),
         ),
         ChangeNotifierProvider.value(
           value: UserProvider(),
@@ -63,19 +46,20 @@ class MyApp extends StatelessWidget {
             centerTitle: true,
           ),
         ),
-        home: StreamBuilder(
+        home:
+            const LogInScreen(), /*StreamBuilder(
           stream: FirebaseAuth.instance.authStateChanges(),
           builder: (ctx, userSnapshot) {
             if (userSnapshot.connectionState == ConnectionState.waiting) {
               return const SplashScreen();
             }
             if (userSnapshot.hasData) {
-              return const UserListScreen();
+              return const UsersScreen();
             } else {
               return const LogInScreen();
             }
           },
-        ),
+        ),*/
       ),
     );
   }

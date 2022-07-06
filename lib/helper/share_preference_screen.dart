@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:collection/collection.dart';
 
-class Preference extends ChangeNotifier {
+class SharedPreferenceScreen extends ChangeNotifier {
   String userList = "USER_LIST";
 
   Future saveUser(UserModel user) async {
@@ -32,8 +32,6 @@ class Preference extends ChangeNotifier {
     print(' <======== LIST STRING ========> : $listString');
     List<UserModel>? list =
         listString != null ? UserModel.decode(listString) : [];
-
-    /*(listString != null ? jsonDecode(listString) as List : []).cast<User>();*/
     return list;
   }
 

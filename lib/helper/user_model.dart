@@ -6,7 +6,6 @@ class UserModel extends ChangeNotifier {
   String? username;
   String? password;
   String? email;
-  // XFile? imageUrl;
   String? userId;
 
   UserModel({
@@ -48,12 +47,4 @@ class UserModel extends ChangeNotifier {
             .map<Map<String, dynamic>>((user) => UserModel.toMap(user))
             .toList(),
       );
-  //
-  // String encode(List<User> user) => json.encode(
-  //       user.map<Map<String, dynamic>>((user) => User.toMap(user)).toList(),
-  //     );
-  //
-  // List<User> decode(String musics) => (json.decode(musics) as List<dynamic>)
-  //     .map<User>((item) => User.fromJson(item))
-  //     .toList();
 }
