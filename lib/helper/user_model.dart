@@ -7,12 +7,16 @@ class UserModel extends ChangeNotifier {
   String? password;
   String? email;
   String? userId;
+  bool? userDelete;
+  bool? senderDelete;
 
   UserModel({
     this.username,
     this.password,
     this.email,
     this.userId,
+    this.userDelete,
+    this.senderDelete,
   });
 
   Map<String, dynamic> toJson() => {
@@ -20,6 +24,8 @@ class UserModel extends ChangeNotifier {
         'password': password,
         'email': email,
         'userId': userId,
+        'userDelete': userDelete,
+        'senderDelete': senderDelete,
       };
 
   factory UserModel.fromJson(Map<String, dynamic> jsonData) {
@@ -28,6 +34,8 @@ class UserModel extends ChangeNotifier {
       password: jsonData['password'],
       email: jsonData['email'],
       userId: jsonData['userId'],
+      userDelete: jsonData['userDelete'],
+      senderDelete: jsonData['senderDelete'],
     );
   }
   static Map<String, dynamic> toMap(UserModel user) => {
@@ -35,6 +43,8 @@ class UserModel extends ChangeNotifier {
         'password': user.password,
         'email': user.email,
         'userId': user.userId,
+        'userDelete': user.userDelete,
+        'senderDelete': user.senderDelete,
       };
 
   static List<UserModel> decode(String user) =>

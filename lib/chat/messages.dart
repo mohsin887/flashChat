@@ -7,63 +7,108 @@ import 'package:provider/provider.dart';
 class Messages extends StatefulWidget {
   final String senderId;
   final String senderName;
+  // final bool isDeletedByUser;
+  // final bool isDeletedBySender;
   const Messages({
     Key? key,
     required this.senderId,
     required this.senderName,
+    // required this.isDeletedBySender,
+    // required this.isDeletedByUser,
   }) : super(key: key);
 
   @override
-  State<Messages> createState() => _MessagesState(senderId, senderName);
+  State<Messages> createState() => _MessagesState();
 }
 
 class _MessagesState extends State<Messages> {
   CollectionReference chats = FirebaseFirestore.instance.collection('chat');
-  String senderId;
-  String senderName;
   final _controller = TextEditingController();
 
-  _MessagesState(this.senderId, this.senderName);
   var chatDocId;
 
   @override
   void initState() {
     super.initState();
-    getAndAddUser();
+    getAndAddChat();
   }
 
-  void getAndAddUser() async {
+  void getAndAddChat() async {
     final currentUserId =
         Provider.of<UserProvider>(context, listen: false).user?.userId;
-    await chats
-        .where('users', isEqualTo: {senderId: null, currentUserId: null})
+    final chat = await chats
+        .where('users', isEqualTo: {widget.senderId: null, currentUserId: null})
         .limit(1)
-        .get()
-        .then(
-          (QuerySnapshot querySnapshot) async {
-            if (querySnapshot.docs.isNotEmpty) {
-              setState(() {
-                chatDocId = querySnapshot.docs.single.id;
-              });
-            } else {
-              await chats.add({
-                'users': {currentUserId: null, senderId: null},
-                'username': {
-                  currentUserId:
-                      Provider.of<UserProvider>(context, listen: false)
-                          .user
-                          ?.username,
-                  senderId: senderName
-                }
-              }).then((value) => {
-                    chatDocId = value,
-                  });
-            }
-          },
-        )
-        .catchError((error) {
-          print(error);
+        .get();
+    // chatDocId = currentUserId! + widget.senderId;
+    // if (widget.isDeletedByUser) {
+    //   print('isDeletedByUser in if : ${widget.isDeletedByUser}');
+    //
+    //   return;
+    // }
+    if (chat.docs.isEmpty) {
+      setState(() {
+        chatDocId = currentUserId! + widget.senderId;
+        print('chat id in setState is: $chatDocId');
+      });
+
+      print('If part working if docs is EMPTY');
+      if (!mounted) return;
+
+      await chats.doc(chatDocId).set({
+        'users': {currentUserId: null, widget.senderId: null},
+        'deleteBy': {
+          // currentUserId: widget.isDeletedByUser,
+          widget.senderId: null
+        },
+        'username': {
+          currentUserId:
+              Provider.of<UserProvider>(context, listen: false).user?.username,
+          widget.senderId: widget.senderName
+        }
+      }).then((value) {
+        print('value is added');
+      });
+    } else {
+      // if (widget.isDeletedBySender) {
+      //   print('isDeletedBySender in else : ${widget.isDeletedBySender}');
+      //   return;
+      // }
+      print('Else Part working if docs is nonEMPTY');
+      if (chat.docs.single.exists) {
+        setState(() {
+          chatDocId = widget.senderId + currentUserId!;
+          print('chat id in setState is: $chatDocId');
         });
+      }
+      if (!mounted) return;
+      await chats.doc(chatDocId).set({
+        'users': {currentUserId: null, widget.senderId: null},
+        'deleteBy': {
+          currentUserId: null,
+          // widget.senderId: widget.isDeletedBySender
+        },
+        'username': {
+          currentUserId:
+              Provider.of<UserProvider>(context, listen: false).user?.username,
+          widget.senderId: widget.senderName
+        }
+      }).then((value) {
+        print('value is added');
+      }).catchError((onError) {
+        print('An Error Occur$onError');
+      });
+    }
+
+    // .then(
+    //   (QuerySnapshot querySnapshot) async {
+    //     if (querySnapshot.docs.isNotEmpty) {
+    //
+    //   },
+    // )
+    // .catchError((error) {
+    //   print(error);
+    // }
   }
 
   Future<void> sendMessageButton(String message) async {
@@ -75,7 +120,7 @@ class _MessagesState extends State<Messages> {
       'createdAt': FieldValue.serverTimestamp(),
       'userId': user,
       'username': userData['username'],
-      'senderName': senderName,
+      'senderName': widget.senderName,
       'message': message,
     }).then((value) {
       _controller.text = '';
@@ -93,6 +138,13 @@ class _MessagesState extends State<Messages> {
 
   @override
   Widget build(BuildContext context) {
+    print('Message class');
+    // print('${widget.isDeletedByUser}');
+    // print('${widget.isDeletedBySender}');
+    print(widget.senderId);
+    print(widget.senderName);
+    print('Message class');
+
     return getChatStreamBuilder(context);
   }
 
@@ -163,13 +215,13 @@ class _MessagesState extends State<Messages> {
     return StreamBuilder<DocumentSnapshot>(
       stream: FirebaseFirestore.instance
           .collection('users')
-          .doc(senderId)
+          .doc(widget.senderId)
           .snapshots(),
       builder: (ctx, snapshot) {
         if (snapshot.data != null) {
           return ListTile(
             title: Text(
-              toBeginningOfSentenceCase(senderName)!,
+              toBeginningOfSentenceCase(widget.senderName)!,
               style: const TextStyle(
                   color: Colors.black, fontWeight: FontWeight.bold),
             ),

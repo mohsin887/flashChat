@@ -23,6 +23,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
 
   final bool isSignUp = false;
+  // bool isDeleted = false;
 
   @override
   void initState() {
@@ -43,8 +44,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
           password: _userPasswordController.text,
           email: _userEmailController.text,
           userId: DateTime.now().millisecond.toString(),
+          userDelete: false,
+          senderDelete: false,
         );
-
+        if (!mounted) return;
         Provider.of<UserProvider>(context, listen: false).saveUser(user);
         SharedPreferenceScreen().saveUser(user);
         final userId =
@@ -54,6 +57,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
         final userEmail =
             Provider.of<UserProvider>(context, listen: false).user?.email;
+        final userDelete =
+            Provider.of<UserProvider>(context, listen: false).user?.userDelete;
+        final senderDelete = Provider.of<UserProvider>(context, listen: false)
+            .user
+            ?.senderDelete;
 
         await FirebaseFirestore.instance
             .collection('users')
@@ -68,15 +76,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 'email': userEmail,
                 'status': 'Offline',
                 'userId': userId,
+                'userDelete': userDelete,
+                'senderDelete': senderDelete,
               },
               SetOptions(merge: true),
             );
           }
         });
+        if (!mounted) return;
+
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (ctx) => const LogInScreen()),
         );
       } else {
+        if (!mounted) return;
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Email is already Exits'),

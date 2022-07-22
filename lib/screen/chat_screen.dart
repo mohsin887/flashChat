@@ -4,10 +4,14 @@ import 'package:flutter/material.dart';
 class ChatScreen extends StatefulWidget {
   final String username;
   final String senderId;
-  const ChatScreen({
+  // bool isDeletedByUser;
+  // bool isDeletedBySender;
+  ChatScreen({
     Key? key,
     required this.username,
     required this.senderId,
+    // this.isDeletedByUser = false,
+    // this.isDeletedBySender = false,
   }) : super(key: key);
 
   @override
@@ -25,6 +29,8 @@ class _ChatScreenState extends State<ChatScreen> {
               child: Messages(
                 senderId: widget.senderId,
                 senderName: widget.username,
+                // isDeletedByUser: widget.isDeletedByUser,
+                // isDeletedBySender: widget.isDeletedBySender,
               ),
             ),
           ],
